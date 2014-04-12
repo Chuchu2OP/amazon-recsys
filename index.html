@@ -240,6 +240,36 @@ RMSE: 1.596316
                 </section>
 
                 <section>
+                    <h2>OK cool but... how good is that?</h2>
+
+                    <p class="fragment roll-in">Baseline model: guess at random, weighted:</p>
+                    <p>
+                        <pre class="fragment roll-in"><code data-trim contenteditable>
+1 "star"   ~7.62%
+2 "stars"  ~5.13%
+3 "stars"  ~8.55%
+4 "stars" ~19.38%
+5 "stars" ~59.29%
+                        </code></pre>
+                    </p>
+                    <p>
+                        <pre class="fragment roll-in"><code data-trim contenteditable>
+MODEL/ID: WEIGHTED-RANDOM
+MAE: 3.93757
+RMSE: 4.192413
+                        </code></pre>
+                    </p>
+                    <p>
+                        <pre class="fragment roll-in"><code data-trim contenteditable>
+MODEL/ID: 7500500
+MAE: 0.766031
+RMSE: 1.596316
+                        </code></pre>
+                    </p>
+                    <p class="fragment roll-in"><small>SVD model is ~5 times more accurate than the Weighted-Random model</small></p>
+                </section>
+
+                <section>
                     <h2>Conclusions</h2>
                     <p class="fragment roll-in">
                         <img src="imgs/stars.png" style="height:40px" />
@@ -264,7 +294,7 @@ RMSE: 1.596316
                 <section>
                     <h1>FIN</h1>
                     <p>
-                        <p><a href="http://tomaspdc.github.io/amazon-recys">tomaspdc.github.io/amazon-recys</a></p>
+                        <p><a href="http://tomaspdc.github.io/amazon-recsys">tomaspdc.github.io/amazon-recsys</a></p>
                     </p>
                     <p>
                         <small>by <a href="http://tomaspdc.info">Tomás Pica</a> / <a href="http://twitter.com/tomaspdc">@tomaspdc</a> / <a href="http://github.com/tomaspdc">github.com/tomaspdc</a></small>
