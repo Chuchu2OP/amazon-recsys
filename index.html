@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+
+        <title>Recommendation Engine using Amazon Reviews</title>
+
+        <meta name="description" content="Final project for General Assembly's Data Science course of 2014">
+        <meta name="author" content="Tomas Pica">
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <link rel="stylesheet" href="css/reveal.min.css">
+        <link rel="stylesheet" href="css/theme/night.css" id="theme">
+
+        <!-- For syntax highlighting -->
+        <link rel="stylesheet" href="lib/css/zenburn.css">
+
+        <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+        <script>
+            if( window.location.search.match( /print-pdf/gi ) ) {
+                var link = document.createElement( 'link' );
+                link.rel = 'stylesheet';
+                link.type = 'text/css';
+                link.href = 'css/print/pdf.css';
+                document.getElementsByTagName( 'head' )[0].appendChild( link );
+            }
+        </script>
+
+        <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+    </head>
+
+    <body>
+
+        <div class="reveal">
+
+            <!-- Any section element inside of this container is displayed as a slide -->
+            <div class="slides">
+                <section>
+                    <h2>Recommender Systems</h2>
+                    <h3>An experiment with Amazon reviews</h3>
+                    <p>
+                        <small>by <a href="http://tomaspdc.info">Tomás Pica</a> / <a href="http://twitter.com/tomaspdc">@tomaspdc</a></small>
+                    </p>
+                    <aside class="notes">
+                        Hi my name is Tomás Pica, I'm a mathematician first and a software developer second, and today I'd like to present you the project I've been working on as a final study for my Data Science course at General Assembly: A recommender system.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>What is a Recommender System?</h2>
+                    <p class="fragment roll-in">Filters information</p>
+                    <p class="fragment roll-in">Discovers preferences on a subject</p>
+                    <p class="fragment roll-in">Measures similarities between users</p>
+                    <aside class="notes">
+                        <p>So before jumping into the project itself, I'd like to briefly explain what is a recommender system. A recommender system, at the most basic level, is just a system that can filter information...</p>
+                        <p>But that also is now widely used by lots of companies worldwide to discover preferences of their user base...</p>
+                        <p>And also to measure how similar their users are...</p>
+                        <p>Which can lead to other interesting conclusions as well...</p>
+                    </aside>
+                </section>
+
+                <section>
+                        <h2>Real Examples</h2>
+                        <p>
+                            <img class="fragment roll-in" src="/imgs/netflix-logo.jpg" style="height:60px;" />
+                            <img class="fragment roll-in" src="/imgs/last-fm-logo.png" style="height:60px;" />
+                            <img class="fragment roll-in" src="/imgs/pandora-logo.png" style="height:60px;" />
+                        </p>
+                        <p>
+                            <img class="fragment roll-in" src="/imgs/google-logo.jpg" style="height:60px;" />
+                            <img class="fragment roll-in" src="/imgs/ebay-logo.jpg" style="height:60px;" />
+                            <img class="fragment roll-in" src="/imgs/steam-logo.jpg" style="height:60px;" />
+                            <img class="fragment roll-in" src="/imgs/twitter-logo.jpg" style="height:60px;" />
+                        </p>
+                        <p>
+                            <img class="fragment roll-in" src="/imgs/lulu-logo.png" style="height:60px;" />
+                            <img class="fragment roll-in" src="/imgs/okcupid-logo.png" style="height:60px;" />
+                            <img class="fragment roll-in" src="/imgs/match-logo.jpg" style="height:60px;" />
+                        </p>
+                        <p>
+                            <div class="fragment roll-in">
+                            <hr />
+                            <img src="/imgs/amazon-logo.jpg" style="height:160px;" />
+                            </div>
+                        </p>
+                        <aside class="notes">
+                            <p>After these abstract explanations, I'd like to give you a few examples of recommender systems "in the wild".</p>
+                            <p>In the movie and music side, several companies use recommender systems heavily like Netflix, Last.fm, Pandora...</p>
+                            <p> But also Google, both in the search engine and in other products like Google+ uses recommendations, eBay and Valve's Steam both use recommendations based on your historical preferences.</p>
+                            <p>If what we want to recommend are not objects but other persons, Twitter recommends you who to follow based on your previous preferences as well. And of course the core of dating sites like Lulu, OkCupid and Match.com is recommending you how to date based on your tastes and historical preferences too. I focused my attention on a what most people agree that is the canonical recommender system at the core of the business: Amazon.com</p>
+                        </aside>
+                </section>
+
+                <section>
+                    <h2>Understanding<br />Amazon's<br />ecosystem</h2>
+                    <p class="fragment roll-in">Over 144 million active customer accounts.<br /><small>( ~2.27 times the population of the UK )</small></p>
+                    <p class="fragment roll-in">Over 222 million products on sale.</p>
+                    <p class="fragment roll-in">426 items sold per second.<br/><small>(Christmas 2013)</small></p>
+                    <div class="fragment roll-in">
+                    <hr />
+                    <p><b>Customers can review products they bought on a scale of 1 to 5</b></p>
+                    </div>
+                    <aside class="notes">
+                        To solve a problem, first we need to understand the problem. Here are a few numbers that may help you find your place in this puzzle. The key to everything are the reviews of course.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Where's the Data?</h2>
+
+                    <p class="fragment roll-in">
+                        <img src="/imgs/stanford-logo.jpg" style="height:100px;" />
+                        <img src="/imgs/snap-logo.jpg" style="height:100px;" />
+                    </p>
+
+                    <div class="fragment roll-in">
+
+                    <p>~34.5 million reviews.</p>
+                    <p>~6.5 million users.</p>
+                    <p>~2.5 million products.</p>
+                    <p>Spanning from Jun 1995 to Mar 2013</p>
+
+                    <p>
+                    <small>Source: <a href="http://snap.stanford.edu/data/web-Amazon.html">http://snap.stanford.edu/data/web-Amazon.html</a> <br />Permission granted by Julian McAuley (<a href="mailto:jmcauley@cs.stanford.edu">jmcauley@cs.stanford.edu</a>)
+                    <br />
+                    J. McAuley and J. Leskovec. <a href="http://i.stanford.edu/~julian/pdfs/recsys13.pdf">Hidden factors and hidden topics: understanding rating dimensions with review text</a>. RecSys, 2013.
+                    </small>
+                    </p>
+
+                    </div>
+                </section>
+
+                <section>
+                    <h2>A raw review</h2>
+                    <pre><code data-trim contenteditable>
+product/productId: B00005X3U4
+product/title: The voice of Bugle Ann
+product/price: unknown
+review/userId: A169ZYI77GT1F3
+review/profileName: Janet K. May
+review/helpfulness: 0/0
+review/score: 5.0
+review/time: 1288051200
+review/summary: Childhood Memories
+review/text: My husband remembered this as a little boy. He tried to find one in the library but they had none. What a surprise he had on his birthday and thoroughly enjoyed it again. Brought a lot of old memories and stories to be told.
+                    </code></pre>
+                    <aside class="notes">
+                        This is what a raw review looks like in the dataset. Reviews are just separated by an empty line, they need to be cleaned.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Processed reviews</h2>
+                    <pre><code data-trim contenteditable>
+...
+B000HEKTIW::A7EWCPD8COL3X::5::4.99::2/2::1292889600
+B00005AQF1::A19CQRD6DIHMQL::5::unknown::0/3::1124409600
+B000DZH89I::A2POGVCWFR6738::2::unknown::0/0::1358208000
+B0007HEURA::A3C2A3D2KG1F1A::5::unknown::2/2::1266796800
+B0002DJNNA::A1MFR5PGMZFQPX::1::5.93::0/1::1290297600
+B003Y6ID2Y::ATGPAY0V61JO7::5::2.99::0/0::1178928000
+B00029BM6A::A7M0T2XJM74DN::5::unknown::0/0::1333929600
+B0000DD75Q::A1BKIHESLDFD95::4::9.89::3/3::1180656000
+B743504704::A1IE6VWY0U0VNT::3::unknown::0/0::1204156800
+B000E0C6SK::A16QQ78I8J29PA::4::unknown::3/3::1275264000
+...
+                    </code></pre>
+                    <aside class="notes">
+                        And this is what we have after a simple transformation.
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Dataset slicing</h2>
+                    <p>True Blind subset: Random sample of ~9.8 million reviews</p>
+                    <p>Second Blind subset: Random sample of ~6.5 million reviews</p>
+                    <p>Training/Test sets: 80%/20% in random incremental samples with step size of 100k reviews, from 100,500 reviews to 11 million reviews.</p>
+                    <p><small>That's a 100500 reviews subset, a 200,500 reviews subset, etc.</small></p>
+                </section>
+
+                <section>
+                    <h2>Measuring Similarity</h2>
+                    <h3>Cosine Similarity</h3>
+                    <p>
+                        <img src="/imgs/cosine.png" style="height:400px" />
+                    </p>
+                </section>
+
+                <section>
+                    <h2>Predicting Behaviour</h2>
+                    <h3>Singular Value Decomposition</h3>
+                    <p>
+                        <img src="/imgs/svd.jpg" style="height:400px" />
+                    </p>
+                    <p>
+                        One SVD model was computed for each Train/Test subset.
+                    </p>
+                </section>
+
+                <section>
+                    <h2>Training Errors</h2>
+                    <p>
+                        <img src="/imgs/train-test.png" style="height:400px" />
+                    </p>
+                    <p>
+                        <small>5-fold averages on <span style="color:#2078b3">Mean Absolute Error</span> and <span style="color:#ff7f0f">Root Mean Squared Error</span></small>
+                    </p>
+
+                </section>
+
+                <section>
+                    <h2>Second Blind Errors</h2>
+
+                    <p>
+                        <img src="/imgs/second-blind.png" style="height:400px" />
+                    </p>
+                    <p>
+                        <small><span style="color:#2078b3">MAE</span> and <span style="color:#ff7f0f">RMSE</span> against Second Blind subset.</small>
+                    </p>
+                </section>
+
+                <section>
+                    <h2>Selecting a model</h2>
+                    <p>The model minimizing the Second Blind <span style="color:#2078b3">MAE</span> error was chosen.</p>
+                    <p><span style="color:#2078b3">MAE</span> and <span style="color:#ff7f0f">RMSE</span> were measured against the True Blind subset.</p>
+                    <p>
+                        <pre><code data-trim contenteditable>
+MODEL/ID: 7500500
+MAE: 0.766031
+RMSE: 1.596316
+                        </code></pre>
+                    </p>
+                </section>
+
+                <section>
+                    <h2>Conclusions</h2>
+                    <p class="fragment roll-in">
+                        <img src="/imgs/stars.png" style="height:40px" />
+                    </p>
+                    <p class="fragment roll-in">
+                        Big Data != Better Data
+                    </p>
+                    <p  class="fragment roll-in">
+                        Model Storage Size
+                    </p>
+                    <p  class="fragment roll-in">
+                        Predict Offline, Recommend Online
+                    </p>
+                    <aside class="notes">
+                        <p>The current model can predict the review an user will give to a product, with a mean absolute error of ~0.7 "stars".</p>
+                        <p>More data doesn't necessarily means better results, although this model needed a considerable amount of reviews to bypass the "cold-start" disadvantage of recommender systems (final model was trained with ~7.5 million reviews).</p>
+                        <p>An SVD model grows non-trivially in size (this one sits at ~1.1GB), and is not able to predict in real-time without a considerable amount of processing power.</p>
+                        <p>Although, it's trivial to compute periodically the predictions for the users, and if needed, is also trivial to re-train the model in parallel, making it a viable solution to offer recommendations.</p>
+                    </aside>
+                </section>
+
+                <section>
+                    <h1>FIN</h1>
+                    <p>
+                        <small>by <a href="http://tomaspdc.info">Tomás Pica</a> / <a href="http://twitter.com/tomaspdc">@tomaspdc</a></small>
+                    </p>
+                    <p>
+                        <p>github link</p>
+                        <p>tomaspdc.info link</p>
+                    </p>
+                </section>
+
+            </div>
+
+        </div>
+
+        <script src="lib/js/head.min.js"></script>
+        <script src="js/reveal.min.js"></script>
+
+        <script>
+
+            // Full list of configuration options available here:
+            // https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+                controls: true,
+                progress: true,
+                history: true,
+                center: true,
+
+                theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+                transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+                // Parallax scrolling
+                // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+                // parallaxBackgroundSize: '2100px 900px',
+
+                // Optional libraries used to extend on reveal.js
+                dependencies: [
+                    { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+                    { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+                    { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+                    { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+                ]
+            });
+
+        </script>
+
+    </body>
+</html>
