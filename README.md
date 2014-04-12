@@ -10,4 +10,7 @@ Source: J. McAuley and J. Leskovec. [Hidden factors and hidden topics: understan
 Structure
 ==
 
+index.html: You can visit it at http://tomaspdc.github.io/amazon-recsys to go through a neat presentation. Press 'S' to view the notes.
+
 /src/: Contains a set of utility scripts to aid in cleaning the data, training the models and measuring the errors.
+
